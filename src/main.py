@@ -19,7 +19,7 @@ async def main() -> None:
     """Actor entry point.
 
     Raises:
-        ValueError: If required attributes
+        ValueError: If required input attributes are missing
     """
     async with Actor:
         # Handle input

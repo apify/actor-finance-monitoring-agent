@@ -12,8 +12,8 @@ from src.state import State
 from src.tools import (
     tool_get_ticker_info,
     tool_get_ticker_news,
+    tool_get_ticker_price_targets,
     tool_get_ticker_recommendations,
-    tool_get_ticket_price_targets,
 )
 
 logger = logging.getLogger('apify')
@@ -29,7 +29,7 @@ async def agent_analysis(state: State, config: RunnableConfig) -> dict:
     tools = [
         tool_get_ticker_info,
         tool_get_ticker_news,
-        tool_get_ticket_price_targets,
+        tool_get_ticker_price_targets,
         tool_get_ticker_recommendations,
     ]
     subgraph = create_react_agent(llm, tools)
@@ -41,7 +41,7 @@ async def agent_analysis(state: State, config: RunnableConfig) -> dict:
                 'You are an AI agent specialized for finance data gathering and summarization. '
                 'Your job is to use tools to gather relevant data about the stock ticker '
                 'and summarize it. Be sure to include important information and events, '
-                'analyst reccomendations and price targets.'
+                'analyst recommendations and price targets.'
                 '\n'
                 f'Ticker: {state["ticker"]}'
                 f"Today's date: {datetime.datetime.now(tz=datetime.UTC).strftime('%Y-%m-%d')}"

@@ -23,6 +23,6 @@ class State(TypedDict):
     ticker: str
     """Ticker that is being analyzed."""
     analysis: str
-    """Analysis and data about the ticker news, prices and recommendations."""
+    """Analysis and data about the ticker news, prices, and recommendations."""
     report: OutputTickerReport
     """Final report for the ticker for the user."""

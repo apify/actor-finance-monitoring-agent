@@ -28,7 +28,7 @@ async def tool_get_ticker_news(ticker: str) -> list[TickerNewsEntry]:
         'tickers': [f'{ticker}'],
     }
     if not (run := await Actor.apify_client.actor('canadesk/yahoo-finance').call(run_input=run_input)):
-        msg = 'Failed to start the actor canadesk/yahoo-finance!'
+        msg = 'Failed to start the Actor canadesk/yahoo-finance!'
         raise RuntimeError(msg)
 
     # dataset_id = '4NG1scPdVBRIhYGFe'  # noqa: ERA001
@@ -60,7 +60,7 @@ async def tool_get_ticker_news(ticker: str) -> list[TickerNewsEntry]:
 
 
 @tool
-async def tool_get_ticket_price_targets(ticker: str) -> TickerPriceTarget | str:
+async def tool_get_ticker_price_targets(ticker: str) -> TickerPriceTarget | str:
     """Tool to get current price targets (analysis) for a ticker.
 
     Args:
@@ -75,13 +75,13 @@ async def tool_get_ticket_price_targets(ticker: str) -> TickerPriceTarget | str:
     Raises:
             RuntimeError: If dataset does not contain required fields.
     """
-    logger.debug('Running tool: tool_get_ticket_price_targets')
+    logger.debug('Running tool: tool_get_ticker_price_targets')
     run_input = {
         'process': 'gp',
         'tickers': [f'{ticker}'],
     }
     if not (run := await Actor.apify_client.actor('canadesk/yahoo-finance').call(run_input=run_input)):
-        msg = 'Failed to start the actor canadesk/yahoo-finance!'
+        msg = 'Failed to start the Actor canadesk/yahoo-finance!'
         raise RuntimeError(msg)
 
     # dataset_id = '18rhSER1HTaKcq5lc'  # noqa: ERA001
@@ -125,7 +125,7 @@ async def tool_get_ticker_info(ticker: str) -> TickerInfo:
         'tickers': [f'{ticker}'],
     }
     if not (run := await Actor.apify_client.actor('canadesk/yahoo-finance').call(run_input=run_input)):
-        msg = 'Failed to start the actor canadesk/yahoo-finance!'
+        msg = 'Failed to start the Actor canadesk/yahoo-finance!'
         raise RuntimeError(msg)
 
     # dataset_id = '7EENr5QdvxCTQOdmp'  # noqa: ERA001
@@ -167,7 +167,7 @@ async def tool_get_ticker_recommendations(ticker: str) -> list[TickerRecommendat
         'tickers': [f'{ticker}'],
     }
     if not (run := await Actor.apify_client.actor('canadesk/yahoo-finance').call(run_input=run_input)):
-        msg = 'Failed to start the actor canadesk/yahoo-finance!'
+        msg = 'Failed to start the Actor canadesk/yahoo-finance!'
         raise RuntimeError(msg)
 
     # dataset_id = 'vt4ZjUpiTkA53gsnu'  # noqa: ERA001
