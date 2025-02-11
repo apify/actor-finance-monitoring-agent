@@ -2,13 +2,13 @@ from apify import Actor
 
 
 async def get_yahoo_dataset_data(dataset_id: str) -> dict:
-    """Retrieve dataset from Apify.
+    """Retrieve data from Yahoo Actor run Apify dataset.
 
     Args:
         dataset_id (str): Dataset ID.
 
     Returns:
-        dict: Dataset record.
+        dict: Dataset record with the data.
 
     Raises:
         RuntimeError: If dataset retrieval fails.

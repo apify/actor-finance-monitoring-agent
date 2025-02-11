@@ -22,6 +22,9 @@ logger = logging.getLogger('apify')
 async def agent_analysis(state: State, config: RunnableConfig) -> dict:
     """Agent to analyze the stock ticker.
 
+    This agent uses tools to gather relevant data about the stock ticker and summarize it.
+    The summary is then passed to the next agent.
+
     Returns:
         dict: graph state update with the analysis.
     """
@@ -66,6 +69,8 @@ async def agent_analysis(state: State, config: RunnableConfig) -> dict:
 def agent_report(state: State) -> dict:
     """Agent to create a report based on the analysis.
 
+    This agent generates a report about the stock ticker using the ticker data summary.
+
     Returns:
         dict: graph state update with the report.
 
@@ -104,6 +109,9 @@ def agent_report(state: State) -> dict:
 
 def supervisor(state: State) -> Command[Literal['agent_analysis', 'agent_report']]:
     """Supervisor agent to control the flow of the agents.
+
+    This agent supervises the agents and determines the next appropriate action based on the current state and
+    updates the state accordingly the user.
 
     Returns:
         Command: Command with status update and goto next agent.

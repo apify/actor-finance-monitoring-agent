@@ -31,7 +31,6 @@ async def tool_get_ticker_news(ticker: str) -> list[TickerNewsEntry]:
         msg = 'Failed to start the Actor canadesk/yahoo-finance!'
         raise RuntimeError(msg)
 
-    # dataset_id = '4NG1scPdVBRIhYGFe'  # noqa: ERA001
     dataset_id = run['defaultDatasetId']
     result = await get_yahoo_dataset_data(dataset_id)
 
@@ -84,7 +83,6 @@ async def tool_get_ticker_price_targets(ticker: str) -> TickerPriceTarget | str:
         msg = 'Failed to start the Actor canadesk/yahoo-finance!'
         raise RuntimeError(msg)
 
-    # dataset_id = '18rhSER1HTaKcq5lc'  # noqa: ERA001
     dataset_id = run['defaultDatasetId']
     result = await get_yahoo_dataset_data(dataset_id)
 
@@ -128,7 +126,6 @@ async def tool_get_ticker_info(ticker: str) -> TickerInfo:
         msg = 'Failed to start the Actor canadesk/yahoo-finance!'
         raise RuntimeError(msg)
 
-    # dataset_id = '7EENr5QdvxCTQOdmp'  # noqa: ERA001
     dataset_id = run['defaultDatasetId']
     result = await get_yahoo_dataset_data(dataset_id)
 
@@ -170,7 +167,6 @@ async def tool_get_ticker_recommendations(ticker: str) -> list[TickerRecommendat
         msg = 'Failed to start the Actor canadesk/yahoo-finance!'
         raise RuntimeError(msg)
 
-    # dataset_id = 'vt4ZjUpiTkA53gsnu'  # noqa: ERA001
     dataset_id = run['defaultDatasetId']
     result = await get_yahoo_dataset_data(dataset_id)
 

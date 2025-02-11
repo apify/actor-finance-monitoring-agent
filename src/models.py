@@ -49,7 +49,7 @@ class TickerRecommendationEntry(BaseModel):
 
 
 class SupervisorOutput(BaseModel):
-    """Output from the supervisor agent."""
+    """Structured output from the supervisor agent."""
 
     next_agent: str = Field(..., description='Next agent to run')
     status: str = Field(
@@ -63,7 +63,7 @@ class SupervisorOutput(BaseModel):
 
 
 class OutputTickerReport(BaseModel):
-    """Output report for a ticker from the AI agent."""
+    """Structured output report for a ticker from the report agent."""
 
     ticker: str = Field(..., description='Ticker symbol')
 
