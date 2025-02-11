@@ -15,9 +15,6 @@ RUN echo "Python version:" \
     && pip install --no-cache-dir uv \
     && echo "Installing dependencies:" \
     && uv sync \
-    #&& poetry config virtualenvs.create false \
-    #&& poetry install --no-interaction --no-ansi --without dev \
-    #&& rm -rf /tmp/.poetry-cache \
     && echo "All installed Python packages:" \
     && uv pip freeze
 
