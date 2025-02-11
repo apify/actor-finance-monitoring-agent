@@ -1,0 +1,13 @@
+{
+  "actorSpecification": 1,
+  "name": "finance-monitoring-agent",
+  "title": "Use AI agent to monitor stock market and generate report",
+  "description": "Use AI agent to monitor stock market and generate report",
+  "version": "0.0",
+  "buildTag": "latest",
+  "input": "./input_schema.json",
+  "storages": {
+    "dataset": "./dataset_schema.json"
+  },
+  "dockerfile": "./Dockerfile"
+}

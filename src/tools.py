@@ -1,16 +1,16 @@
 import logging
-from typing import Annotated
 
+from apify import Actor
 from langchain_core.tools import tool
-from langgraph.prebuilt import InjectedState
 
 from src.models import TickerInfo, TickerNewsEntry, TickerPriceTarget, TickerRecommendationEntry
-from src.utils import get_yahoo_dataset_data, run_async
+from src.utils import get_yahoo_dataset_data
 
 logger = logging.getLogger('apify')
 
+
 @tool
-def tool_get_ticker_news(ticker: str) -> list[TickerNewsEntry]:
+async def tool_get_ticker_news(ticker: str) -> list[TickerNewsEntry]:
     """Tool to get recent news about a ticker.
 
     Args:
@@ -18,11 +18,22 @@ def tool_get_ticker_news(ticker: str) -> list[TickerNewsEntry]:
 
     Returns:
         list[TickerNewsEntry]: Recent news about the ticker.
+
+    Raises:
+        RuntimeError: If dataset does not contain required fields.
     """
-    print('tool_get_ticker_news')
-    assert ticker
-    dataset_id = '4NG1scPdVBRIhYGFe'
-    result = run_async(get_yahoo_dataset_data(dataset_id))
+    logger.debug('Running tool: tool_get_ticker_news')
+    run_input = {
+        'process': 'gn',
+        'tickers': [f'{ticker}'],
+    }
+    if not (run := await Actor.apify_client.actor('canadesk/yahoo-finance').call(run_input=run_input)):
+        msg = 'Failed to start the actor canadesk/yahoo-finance!'
+        raise RuntimeError(msg)
+
+    # dataset_id = '4NG1scPdVBRIhYGFe'  # noqa: ERA001
+    dataset_id = run['defaultDatasetId']
+    result = await get_yahoo_dataset_data(dataset_id)
 
     ticker_news = []
     for entry in result.get('data', []):
@@ -35,31 +46,47 @@ def tool_get_ticker_news(ticker: str) -> list[TickerNewsEntry]:
 
         if not all([title, summary, published_at, provider, url]):
             logger.warning('Skipping news entry with missing fields: %s', entry)
-        ticker_news.append(TickerNewsEntry(
-            ticker=ticker,
-            title=title,
-            summary=summary,
-            published_at=published_at,
-            provider=provider,
-            url=url,
-        ))
+        ticker_news.append(
+            TickerNewsEntry(
+                ticker=ticker,
+                title=title,
+                summary=summary,
+                published_at=published_at,
+                provider=provider,
+                url=url,
+            )
+        )
     return ticker_news
 
 
 @tool
-def tool_get_ticket_price_targets(ticker: str) -> TickerPriceTarget:
+async def tool_get_ticket_price_targets(ticker: str) -> TickerPriceTarget | str:
     """Tool to get current price targets (analysis) for a ticker.
 
     Args:
         ticker (str): Ticker symbol.
+        output (Literal['str', 'model']): Output format.
+            'str' - return as string.
+            'model' - return as Pydantic model.
 
     Returns:
         TickerPriceTarget: Current price targets.
+
+    Raises:
+            RuntimeError: If dataset does not contain required fields.
     """
-    print('tool_get_ticket_price_targets')
-    assert ticker
-    dataset_id = '18rhSER1HTaKcq5lc'
-    result = run_async(get_yahoo_dataset_data(dataset_id))
+    logger.debug('Running tool: tool_get_ticket_price_targets')
+    run_input = {
+        'process': 'gp',
+        'tickers': [f'{ticker}'],
+    }
+    if not (run := await Actor.apify_client.actor('canadesk/yahoo-finance').call(run_input=run_input)):
+        msg = 'Failed to start the actor canadesk/yahoo-finance!'
+        raise RuntimeError(msg)
+
+    # dataset_id = '18rhSER1HTaKcq5lc'  # noqa: ERA001
+    dataset_id = run['defaultDatasetId']
+    result = await get_yahoo_dataset_data(dataset_id)
 
     result.update(result.get('data', {}))
     del result['data']
@@ -69,10 +96,18 @@ def tool_get_ticket_price_targets(ticker: str) -> TickerPriceTarget:
         msg = f'Dataset "{dataset_id}" does not contain required fields {fields}!'
         raise RuntimeError(msg)
 
-    return TickerPriceTarget(**{f: result[f] for f in fields})
+    return TickerPriceTarget(
+        ticker=result['ticker'],
+        current_price=result['current'],
+        analyst_price_target_low=result['low'],
+        analyst_price_target_high=result['high'],
+        analyst_price_target_mean=result['mean'],
+        analyst_price_target_median=result['median'],
+    )
+
 
 @tool
-def tool_get_ticker_info(ticker: str) -> TickerInfo:
+async def tool_get_ticker_info(ticker: str) -> TickerInfo:
     """Tool to get information about a ticker.
 
     Args:
@@ -80,11 +115,22 @@ def tool_get_ticker_info(ticker: str) -> TickerInfo:
 
     Returns:
         TickerInfo: Information about the ticker.
+
+    Raises:
+            RuntimeError: If dataset does not contain required fields.
     """
-    print('tool_get_ticker_info')
-    assert ticker
-    dataset_id = '7EENr5QdvxCTQOdmp'
-    result = run_async(get_yahoo_dataset_data(dataset_id))
+    logger.debug('Running tool: tool_get_ticker_info')
+    run_input = {
+        'process': 'gi',
+        'tickers': [f'{ticker}'],
+    }
+    if not (run := await Actor.apify_client.actor('canadesk/yahoo-finance').call(run_input=run_input)):
+        msg = 'Failed to start the actor canadesk/yahoo-finance!'
+        raise RuntimeError(msg)
+
+    # dataset_id = '7EENr5QdvxCTQOdmp'  # noqa: ERA001
+    dataset_id = run['defaultDatasetId']
+    result = await get_yahoo_dataset_data(dataset_id)
 
     if not (data := result.get('data')):
         msg = f'Failed to get data from dataset "{dataset_id}"! Dataset does not contain "data" field.'
@@ -103,7 +149,7 @@ def tool_get_ticker_info(ticker: str) -> TickerInfo:
 
 
 @tool
-def tool_get_ticker_recommendations(ticker: str) -> list[TickerRecommendationEntry]:
+async def tool_get_ticker_recommendations(ticker: str) -> list[TickerRecommendationEntry]:
     """Tool to get recommendations for a ticker.
 
     Args:
@@ -111,11 +157,22 @@ def tool_get_ticker_recommendations(ticker: str) -> list[TickerRecommendationEnt
 
     Returns:
         list[TickerRecommendationEntry]: Recommendations for the ticker.
+
+    Raises:
+            RuntimeError: If dataset does not contain required fields.
     """
-    print('tool_get_ticker_recommendations')
-    assert ticker
-    dataset_id = 'vt4ZjUpiTkA53gsnu'
-    result = run_async(get_yahoo_dataset_data(dataset_id))
+    logger.debug('Running tool: tool_get_ticker_recommendations')
+    run_input = {
+        'process': 'gr',
+        'tickers': [f'{ticker}'],
+    }
+    if not (run := await Actor.apify_client.actor('canadesk/yahoo-finance').call(run_input=run_input)):
+        msg = 'Failed to start the actor canadesk/yahoo-finance!'
+        raise RuntimeError(msg)
+
+    # dataset_id = 'vt4ZjUpiTkA53gsnu'  # noqa: ERA001
+    dataset_id = run['defaultDatasetId']
+    result = await get_yahoo_dataset_data(dataset_id)
 
     ticker_recommendations = []
     for entry in result.get('data', []):
@@ -128,17 +185,16 @@ def tool_get_ticker_recommendations(ticker: str) -> list[TickerRecommendationEnt
 
         if not all([period, strongbuy, buy, hold, sell, strongsell]):
             logger.warning('Skipping recommendation entry with missing fields: %s', entry)
-        ticker_recommendations.append(TickerRecommendationEntry(
-            ticker=ticker,
-            period=period,
-            strong_buy=strongbuy,
-            buy=buy,
-            hold=hold,
-            sell=sell,
-            strong_sell=strongsell,
-        ))
+        ticker_recommendations.append(
+            TickerRecommendationEntry(
+                ticker=ticker,
+                period=period,
+                recommendations_strong_buy=strongbuy,
+                recommendations_buy=buy,
+                recommendations_hold=hold,
+                recommendations_sell=sell,
+                recommendations_strong_sell=strongsell,
+            )
+        )
 
     return ticker_recommendations
-
-TOOLS = [tool_get_ticker_news, tool_get_ticket_price_targets, tool_get_ticker_info,
-    tool_get_ticker_recommendations]

@@ -2,25 +2,30 @@ from pydantic import BaseModel, Field
 
 
 class TickerPriceTarget(BaseModel):
-    """Price target (analyst) for a ticker."""
+    """Analyst price targets for a ticker."""
+
     ticker: str = Field(..., description='Ticker symbol')
 
-    current: float = Field(..., description='Current price')
-    low: float = Field(..., description='Low price target')
-    high: float = Field(..., description='High price target')
-    mean: float = Field(..., description='Mean price target')
-    median: float = Field(..., description='Median price target')
+    current_price: float = Field(..., description='Current price')
+    analyst_price_target_low: float = Field(..., description='Analyst low price target')
+    analyst_price_target_high: float = Field(..., description='Analyst high price target')
+    analyst_price_target_mean: float = Field(..., description='Analyst mean price target')
+    analyst_price_target_median: float = Field(..., description='Analyst median price target')
+
 
 class TickerInfo(BaseModel):
     """Information about a ticker."""
+
     ticker: str = Field(..., description='Ticker symbol')
 
     sector: str = Field(..., description='Sector')
     industry: str = Field(..., description='Industry')
     description: str = Field(..., description='Description')
 
+
 class TickerNewsEntry(BaseModel):
     """News entry about a ticker."""
+
     ticker: str = Field(..., description='Ticker symbol')
 
     title: str = Field(..., description='Title')
@@ -29,28 +34,44 @@ class TickerNewsEntry(BaseModel):
     published_at: str = Field(..., description='Published at')
     summary: str = Field(..., description='Summary')
 
+
 class TickerRecommendationEntry(BaseModel):
     """Recommendation entry for a ticker."""
+
     ticker: str = Field(..., description='Ticker symbol')
 
     period: str = Field(..., description='Period')
-    strong_buy: int = Field(..., description='Number of strong buy recommendations')
-    buy: int = Field(..., description='Number of buy recommendations')
-    hold: int = Field(..., description='Number of hold recommendations')
-    sell: int = Field(..., description='Number of sell recommendations')
-    strong_sell: int = Field(..., description='Number of strong sell recommendations')
+    recommendations_strong_buy: int = Field(..., description='Number of strong buy recommendations')
+    recommendations_buy: int = Field(..., description='Number of buy recommendations')
+    recommendations_hold: int = Field(..., description='Number of hold recommendations')
+    recommendations_sell: int = Field(..., description='Number of sell recommendations')
+    recommendations_strong_sell: int = Field(..., description='Number of strong sell recommendations')
+
+
+class SupervisorOutput(BaseModel):
+    """Output from the supervisor agent."""
+
+    next_agent: str = Field(..., description='Next agent to run')
+    status: str = Field(
+        ...,
+        description=(
+            'Current status of analysis, is one of the following:\n'
+            'gathering and analyzing data...\n'
+            'creating report...\n'
+        ),
+    )
 
 
 class OutputTickerReport(BaseModel):
     """Output report for a ticker from the AI agent."""
+
     ticker: str = Field(..., description='Ticker symbol')
 
-    sentiment: str = Field(..., description='Ticker sentiment analysis (strong buy, buy, hold, sell, strong sell)')
+    sentiment: str = Field(
+        ..., description='Ticker sentiment analysis one of strong buy, buy, hold, sell or strong sell (case-sensitive)'
+    )
     sentiment_reason: str = Field(
         ...,
-        description=(
-            'Reason for the sentiment analysis. '
-            'Short reasoning about the sentiment (1-2 sentences at most).'
-        )
+        description=('Reason for the sentiment analysis. Short reasoning about the sentiment (1-2 sentences at most).'),
     )
-    report: str = Field(..., description='Finance monitoring report for the ticker')
+    report: str = Field(..., description='Finance monitoring report')

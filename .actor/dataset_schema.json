@@ -1,0 +1,32 @@
+{
+  "actorSpecification": 1,
+  "views": {
+    "overview": {
+      "title": "Overview",
+      "transformation": {
+        "fields": ["ticker", "sentiment", "sentiment_reason", "report"]
+      },
+      "display": {
+        "component": "table",
+        "properties": {
+          "ticker": {
+            "label": "Ticker",
+            "format": "text"
+          },
+          "sentiment": {
+            "label": "Sentiment",
+            "format": "text"
+          },
+          "sentiment_reason": {
+            "label": "Sentiment Reason",
+            "format": "text"
+          },
+          "report": {
+            "label": "Report",
+            "format": "text"
+          }
+        }
+      }
+    }
+  }
+}

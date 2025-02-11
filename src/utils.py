@@ -1,20 +1,5 @@
-import asyncio
-from collections.abc import Coroutine
-from typing import Any
-
 from apify import Actor
 
-
-def run_async(func: Coroutine) -> Any:  # noqa: ANN401
-    """Helper function to run async functions in a synchronous context.
-
-    Args:
-        func (Coroutine): Async function to run.
-
-    Returns:
-        Any: Result of the async function
-    """
-    return asyncio.run(func)
 
 async def get_yahoo_dataset_data(dataset_id: str) -> dict:
     """Retrieve dataset from Apify.
@@ -27,8 +12,10 @@ async def get_yahoo_dataset_data(dataset_id: str) -> dict:
 
     Raises:
         RuntimeError: If dataset retrieval fails.
+        ValueError: If dataset is empty.
     """
-    if not (dataset_items := (await Actor.apify_client.dataset(dataset_id).list_items()).items):
+    dataset_items: list[dict] = (await Actor.apify_client.dataset(dataset_id).list_items()).items
+    if not dataset_items:
         msg = f'Failed to get dataset "{dataset_id}"!'
         raise RuntimeError(msg)
 

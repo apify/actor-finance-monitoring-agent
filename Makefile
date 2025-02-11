@@ -25,7 +25,7 @@ format:
 
 .PHONY: unit-test
 unit-test:
-	uv run -C tests/ pytest
+	uv run --directory tests/ pytest
 
 .PHONE: check
 check: lint type-check unit-test

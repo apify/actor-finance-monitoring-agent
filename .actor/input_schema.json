@@ -31,7 +31,14 @@
       "description": "The API key for the OpenAI API.",
       "editor": "textfield",
       "isSecret": true
+    },
+    "debug": {
+      "title": "Debug",
+      "type": "boolean",
+      "description": "If enabled, the actor will run in debug mode and produce more output.",
+      "editor": "checkbox",
+      "default": false
     }
   },
-  "required": ["ticker"]
+  "required": ["ticker", "model", "openai_api_key"]
 }
