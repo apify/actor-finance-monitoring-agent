@@ -1,0 +1,37 @@
+{
+  "title": "Finance Monitoring Agent",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "ticker": {
+      "title": "Ticker",
+      "type": "string",
+      "description": "The ticker of the stock to analyze.",
+      "editor": "textfield",
+      "prefill": "TSLA"
+    },
+    "model": {
+      "title": "OpenAI model",
+      "type": "string",
+      "description": "The OpenAI model to use. GPT-4o is more capable and provides better results, while GPT-4o Mini is faster and cheaper.",
+      "enum": [
+        "gpt-4o",
+        "gpt-4o-mini"
+      ],
+      "enumTitles": [
+        "GPT-4o (more capable, better results)",
+        "GPT-4o Mini (faster, cheaper)"
+      ],
+      "default": "gpt-4o",
+      "prefill": "gpt-4o-mini"
+    },
+    "openai_api_key": {
+      "title": "OpenAI API Key",
+      "type": "string",
+      "description": "The API key for the OpenAI API.",
+      "editor": "textfield",
+      "isSecret": true
+    }
+  },
+  "required": ["ticker"]
+}
