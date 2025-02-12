@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from apify import Actor
@@ -10,11 +11,66 @@ logger = logging.getLogger('apify')
 
 
 @tool
-async def tool_get_ticker_news(ticker: str) -> list[TickerNewsEntry]:
-    """Tool to get recent news about a ticker.
+async def tool_get_google_news(query: str, date_from: str, max_items: int = 25) -> list[TickerNewsEntry]:
+    """Tool to get recent news from Google News (can be used to get news about a ticker).
 
     Args:
-        ticker (str): Ticker symbol.
+        query (str): Query string.
+        date_from (str): Date from which to get news in format 'YYYY-MM-DD'.
+        max_items (int): Maximum number of news items to return.
+
+    Returns:
+        list[TickerNewsEntry]: Recent news.
+
+    Raises:
+        RuntimeError: If dataset does not contain required fields.
+    """
+    logger.debug('Running tool: tool_get_google_news')
+
+    # check date, raises ValueError if invalid
+    datetime.datetime.strptime(date_from, '%Y-%m-%d')  # noqa: DTZ007
+
+    run_input = {
+        'query': query,
+        'dateFrom': '2024-12-31',
+        'maxItems': max_items,
+        'extractImages': False,
+        'language': 'US:en',
+    }
+    if not (run := await Actor.apify_client.actor('lhotanova/google-news-scraper').call(run_input=run_input)):
+        msg = 'Failed to start the Actor canadesk/google-news-scraper!'
+        raise RuntimeError(msg)
+
+    dataset_id = run['defaultDatasetId']
+    dataset_items: list[dict] = (await Actor.apify_client.dataset(dataset_id).list_items()).items
+
+    google_news = []
+    for entry in dataset_items:
+        title = entry.get('title')
+        published_at = entry.get('publishedAt')
+        provider = entry.get('source')
+        url = entry.get('link')
+
+        if not all([title, published_at, provider, url]):
+            logger.warning('Skipping news entry with missing fields: %s', entry)
+            continue
+        google_news.append(
+            TickerNewsEntry(
+                title=str(title),
+                published_at=str(published_at),
+                provider=str(provider),
+                url=str(url),
+            )
+        )
+    return google_news
+
+
+@tool
+async def tool_get_yahoo_ticker_news(ticker: str) -> list[TickerNewsEntry]:
+    """Tool to get recent news from Yahoo Finance about a ticker.
+
+    Args:
+        ticker (str): Ticker symbol, for example 'TSLA'.
 
     Returns:
         list[TickerNewsEntry]: Recent news about the ticker.
@@ -22,7 +78,7 @@ async def tool_get_ticker_news(ticker: str) -> list[TickerNewsEntry]:
     Raises:
         RuntimeError: If dataset does not contain required fields.
     """
-    logger.debug('Running tool: tool_get_ticker_news')
+    logger.debug('Running tool: tool_get_yahoo_ticker_news')
     run_input = {
         'process': 'gn',
         'tickers': [f'{ticker}'],
@@ -45,9 +101,9 @@ async def tool_get_ticker_news(ticker: str) -> list[TickerNewsEntry]:
 
         if not all([title, summary, published_at, provider, url]):
             logger.warning('Skipping news entry with missing fields: %s', entry)
+            continue
         ticker_news.append(
             TickerNewsEntry(
-                ticker=ticker,
                 title=title,
                 summary=summary,
                 published_at=published_at,
@@ -63,7 +119,7 @@ async def tool_get_ticker_price_targets(ticker: str) -> TickerPriceTarget | str:
     """Tool to get current price targets (analysis) for a ticker.
 
     Args:
-        ticker (str): Ticker symbol.
+        ticker (str): Ticker symbol, for example 'TSLA'.
         output (Literal['str', 'model']): Output format.
             'str' - return as string.
             'model' - return as Pydantic model.
@@ -91,11 +147,13 @@ async def tool_get_ticker_price_targets(ticker: str) -> TickerPriceTarget | str:
 
     fields = ['ticker', 'current', 'low', 'high', 'mean', 'median']
     if not all(f in result for f in fields):
-        msg = f'Dataset "{dataset_id}" does not contain required fields {fields}!'
+        msg = (
+            f'Dataset "{dataset_id}" does not contain required fields {fields}! '
+            f'It is possible that the ticker "{ticker}" is incorrect.'
+        )
         raise RuntimeError(msg)
 
     return TickerPriceTarget(
-        ticker=result['ticker'],
         current_price=result['current'],
         analyst_price_target_low=result['low'],
         analyst_price_target_high=result['high'],
@@ -105,19 +163,19 @@ async def tool_get_ticker_price_targets(ticker: str) -> TickerPriceTarget | str:
 
 
 @tool
-async def tool_get_ticker_info(ticker: str) -> TickerInfo:
-    """Tool to get information about a ticker.
+async def tool_get_ticker_basic_info(ticker: str) -> TickerInfo:
+    """Tool to get basic information about a ticker.
 
     Args:
-        ticker (str): Ticker symbol.
+        ticker (str): Ticker symbol, for example 'TSLA'.
 
     Returns:
-        TickerInfo: Information about the ticker.
+        TickerInfo: Basic information about the ticker.
 
     Raises:
-            RuntimeError: If dataset does not contain required fields.
+        RuntimeError: If dataset does not contain required fields.
     """
-    logger.debug('Running tool: tool_get_ticker_info')
+    logger.debug('Running tool: tool_get_ticker_basic_info')
     run_input = {
         'process': 'gi',
         'tickers': [f'{ticker}'],
@@ -139,7 +197,10 @@ async def tool_get_ticker_info(ticker: str) -> TickerInfo:
 
     fields = ['ticker', 'sector', 'industry', 'description']
     if not all(f in result for f in fields):
-        msg = f'Dataset "{dataset_id}" does not contain required fields {fields}!'
+        msg = (
+            f'Dataset "{dataset_id}" does not contain required fields {fields}! '
+            f'It is possible that the ticker "{ticker}" is incorrect.'
+        )
         raise RuntimeError(msg)
 
     return TickerInfo(**{f: result[f] for f in fields})
@@ -150,13 +211,13 @@ async def tool_get_ticker_recommendations(ticker: str) -> list[TickerRecommendat
     """Tool to get recommendations for a ticker.
 
     Args:
-        ticker (str): Ticker symbol.
+        ticker (str): Ticker symbol, for example 'TSLA'.
 
     Returns:
         list[TickerRecommendationEntry]: Recommendations for the ticker.
 
     Raises:
-            RuntimeError: If dataset does not contain required fields.
+        RuntimeError: If dataset does not contain required fields.
     """
     logger.debug('Running tool: tool_get_ticker_recommendations')
     run_input = {
@@ -183,7 +244,6 @@ async def tool_get_ticker_recommendations(ticker: str) -> list[TickerRecommendat
             logger.warning('Skipping recommendation entry with missing fields: %s', entry)
         ticker_recommendations.append(
             TickerRecommendationEntry(
-                ticker=ticker,
                 period=period,
                 recommendations_strong_buy=strongbuy,
                 recommendations_buy=buy,

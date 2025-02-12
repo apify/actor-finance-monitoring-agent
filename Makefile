@@ -5,11 +5,11 @@ DIRS_WITH_CODE = src/ tests/
 clean:
 	rm -rf .mypy_cache .pytest_cache .ruff_cache build dist htmlcov .coverage
 
-.PHONY: install
+.PHONY: install-dev
 install-dev:
-	uv sync --all-groups
+	uv sync --frozen --all-groups
 
-.PHONY: install
+.PHONY: lint
 lint:
 	uv run ruff format --check $(DIRS_WITH_CODE)
 	uv run ruff check --preview $(DIRS_WITH_CODE)

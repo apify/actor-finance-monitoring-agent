@@ -2,18 +2,20 @@ import datetime
 import logging
 from typing import Literal
 
+from langchain_core.messages import ToolMessage
 from langchain_core.runnables.config import RunnableConfig
 from langgraph.prebuilt import create_react_agent
 from langgraph.types import Command
 
 from src.llm import ChatOpenAISingleton
-from src.models import OutputTickerReport, SupervisorOutput
+from src.models import OutputTickerReport
 from src.state import State
 from src.tools import (
-    tool_get_ticker_info,
-    tool_get_ticker_news,
+    tool_get_google_news,
+    tool_get_ticker_basic_info,
     tool_get_ticker_price_targets,
     tool_get_ticker_recommendations,
+    tool_get_yahoo_ticker_news,
 )
 
 logger = logging.getLogger('apify')
@@ -30,23 +32,28 @@ async def agent_analysis(state: State, config: RunnableConfig) -> dict:
     """
     llm = ChatOpenAISingleton.get_instance()
     tools = [
-        tool_get_ticker_info,
-        tool_get_ticker_news,
+        tool_get_ticker_basic_info,
+        tool_get_yahoo_ticker_news,
         tool_get_ticker_price_targets,
         tool_get_ticker_recommendations,
+        tool_get_google_news,
     ]
     subgraph = create_react_agent(llm, tools)
 
     messages = [
         (
-            'system',
+            'user',
             (
                 'You are an AI agent specialized for finance data gathering and summarization. '
                 'Your job is to use tools to gather relevant data about the stock ticker '
                 'and summarize it. Be sure to include important information and events, '
-                'analyst recommendations and price targets.'
+                'analyst recommendations and price targets. '
+                'Gather information from as many sources as you have access to. '
+                'So if you have tools available for news from Yahoo, Google and X.com, use all of them. '
+                'If you have source link available, include it in the summary. '
+                'If for some reason any tool fails, try to rerun it once more.'
                 '\n'
-                f'Ticker: {state["ticker"]}'
+                f'Ticker: {state["ticker"]}\n'
                 f"Today's date: {datetime.datetime.now(tz=datetime.UTC).strftime('%Y-%m-%d')}"
             ),
         )
@@ -57,6 +64,16 @@ async def agent_analysis(state: State, config: RunnableConfig) -> dict:
         response: dict = {}
         async for substate in subgraph.astream({'messages': messages}, stream_mode='values'):
             message = substate['messages'][-1]
+            # traverse all tool messages and print them
+            if isinstance(message, ToolMessage):
+                # until the analyst message with tool_calls
+                for _message in substate['messages'][::-1]:
+                    if hasattr(_message, 'tool_calls'):
+                        break
+                    logger.debug('-------- Tool --------')
+                    logger.debug('Message: %s', _message)
+                continue
+
             logger.debug('-------- Analyst --------')
             logger.debug('Message: %s', message)
             response = substate
@@ -86,10 +103,11 @@ def agent_report(state: State) -> dict:
 
     messages = [
         (
-            'system',
+            'user',
             (
                 'You are an AI agent for finance report generation. '
                 'Create a comprehensive report about the stock ticker using the provided data. '
+                'If you have source link available for news, include it in the report. '
                 'DO NOT MAKE UP ANY DATA. IF YOU DO NOT KNOW SOMETHING, LEAVE IT OUT. '
                 'DO NOT TRY TO INTERACT WITH THE USER, ONLY CREATE A REPORT. '
                 'REPORT OUTLINE MUST BE AS FOLLOWS (MD format):\n'
@@ -98,43 +116,32 @@ def agent_report(state: State) -> dict:
                 '- Stock price - current stock price and price targets.\n'
                 '- Analyst recommendations - current analyst recommendations for the stock.\n'
                 '- Conclusion - final thoughts on the stock and its future prospects.\n'
-                f'Ticker: {state["ticker"]}'
+                f'Ticker: {state["ticker"]}\n'
                 f"Today's date: {datetime.datetime.now(tz=datetime.UTC).strftime('%Y-%m-%d')}"
             ),
         ),
-        ('assistant', f'Here the ticker news and analysis:\n{state["analysis"]}'),
+        ('user', f'Here the ticker news and analysis:\n{state["analysis"]}'),
     ]
     return {'report': llm_structured.invoke(messages)}
 
 
+# this can be an agent if the graph gets more complex
 def supervisor(state: State) -> Command[Literal['agent_analysis', 'agent_report']]:
-    """Supervisor agent to control the flow of the agents.
+    """Supervisor node to control the flow of the agents.
 
-    This agent supervises the agents and determines the next appropriate action based on the current state and
+    This node supervises the agents and determines the next appropriate action based on the current state and
     updates the state accordingly the user.
 
     Returns:
         Command: Command with status update and goto next agent.
     """
-    llm = ChatOpenAISingleton.get_instance()
-    llm_structured = llm.with_structured_output(SupervisorOutput)
+    analysis_done = bool(state.get('analysis'))
 
-    messages = [
-        (
-            'system',
-            (
-                'You are the supervisor of a financial analysis and monitoring system. '
-                'Please provide the current status of the operation to update the user interface accordingly. '
-                'Based on the current state, determine the next appropriate action. '
-                'Here are the possible actions you can take:\n'
-                'agent_analysis: Conduct a thorough analysis of the stock ticker and generate a detailed report.\n'
-                'agent_report: Create a report based on the analysis and deliver it to the user.\n'
-                f'State:\n'
-                f'Analysis conducted: {bool(state.get("analysis"))}'
-            ),
-        ),
-    ]
-    response: SupervisorOutput = SupervisorOutput.parse_obj(llm_structured.invoke(messages))
+    if not analysis_done:
+        status = 'gathering and analyzing data...'
+        next_agent = 'agent_analysis'
+    else:
+        status = 'creating report...'
+        next_agent = 'agent_report'
 
-    logger.debug('Supervisor response: %s', response)
-    return Command(goto=response.next_agent, update={'status': response.status})
+    return Command(goto=next_agent, update={'status': status})

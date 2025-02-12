@@ -14,7 +14,7 @@ RUN echo "Python version:" \
     && echo "Installing uv:" \
     && pip install --no-cache-dir uv \
     && echo "Installing dependencies:" \
-    && uv sync \
+    && uv sync --frozen --no-dev \
     && echo "All installed Python packages:" \
     && uv pip freeze
 

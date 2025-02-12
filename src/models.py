@@ -4,41 +4,33 @@ from pydantic import BaseModel, Field
 class TickerPriceTarget(BaseModel):
     """Analyst price targets for a ticker."""
 
-    ticker: str = Field(..., description='Ticker symbol')
-
-    current_price: float = Field(..., description='Current price')
-    analyst_price_target_low: float = Field(..., description='Analyst low price target')
-    analyst_price_target_high: float = Field(..., description='Analyst high price target')
-    analyst_price_target_mean: float = Field(..., description='Analyst mean price target')
-    analyst_price_target_median: float = Field(..., description='Analyst median price target')
+    current_price: float
+    analyst_price_target_low: float
+    analyst_price_target_high: float
+    analyst_price_target_mean: float
+    analyst_price_target_median: float
 
 
 class TickerInfo(BaseModel):
     """Information about a ticker."""
 
-    ticker: str = Field(..., description='Ticker symbol')
-
-    sector: str = Field(..., description='Sector')
-    industry: str = Field(..., description='Industry')
-    description: str = Field(..., description='Description')
+    sector: str
+    industry: str
+    description: str
 
 
 class TickerNewsEntry(BaseModel):
     """News entry about a ticker."""
 
-    ticker: str = Field(..., description='Ticker symbol')
-
-    title: str = Field(..., description='Title')
-    url: str = Field(..., description='URL')
-    provider: str = Field(..., description='Provider')
-    published_at: str = Field(..., description='Published at')
-    summary: str = Field(..., description='Summary')
+    title: str
+    provider: str = Field(..., description='Provider of the news')
+    published_at: str
+    summary: str | None = None
+    url: str
 
 
 class TickerRecommendationEntry(BaseModel):
     """Recommendation entry for a ticker."""
-
-    ticker: str = Field(..., description='Ticker symbol')
 
     period: str = Field(..., description='Period')
     recommendations_strong_buy: int = Field(..., description='Number of strong buy recommendations')
