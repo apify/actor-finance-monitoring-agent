@@ -2,6 +2,8 @@
 
 The **Finance Monitoring Agent** is an Apify AI Actor tailored for investors and analysts, providing comprehensive analysis of specific stock tickers. It gathers, processes, and produces insightful reports to help understand market trends, performance metrics, and sentiment analysis.
 
+[![GitHub Repo stars](https://img.shields.io/github/stars/apify/finance-monitoring-agent)](https://github.com/apify/finance-monitoring-agent/stargazers)
+
 ## 🌟 What is Finance Monitoring Agent?
 
 This agent is designed to:
