@@ -1,7 +1,7 @@
 """This module contains the agents/nodes for the finance monitoring agent graph.
 
-They are the building blocks of the graph and are used to perform specific tasks. For example
-in this case the supervisor node controls the flow of the agents and determines the next appropriate action.
+They are the building blocks of the graph and are used to perform specific tasks. For example,
+in this case, the supervisor node controls the flow of the agents and determines the next appropriate action.
 The other two agents are used to analyze the stock ticker and create a report based on the analysis for the user.
 """
 
@@ -56,7 +56,7 @@ async def agent_analysis(state: State, config: RunnableConfig) -> dict:
                 'and summarize it. Be sure to include important information and events, '
                 'analyst recommendations and price targets. '
                 'Gather information from as many sources as you have access to. '
-                'So if you have tools available for news from Yahoo, Google and X.com, use all of them. '
+                'So if you have tools available for news from Yahoo, Google, and X.com, use all of them. '
                 'If you have source link available, include it in the summary. '
                 'If for some reason any tool fails, try to rerun it once more.'
                 '\n'
@@ -127,7 +127,7 @@ def agent_report(state: State) -> dict:
                 f"Today's date: {datetime.datetime.now(tz=datetime.UTC).strftime('%Y-%m-%d')}"
             ),
         ),
-        ('user', f'Here the ticker news and analysis:\n{state["analysis"]}'),
+        ('user', f'Here is the ticker news and analysis:\n{state["analysis"]}'),
     ]
     return {'report': llm_structured.invoke(messages)}
 
@@ -137,10 +137,10 @@ def supervisor(state: State) -> Command[Literal['agent_analysis', 'agent_report'
     """Supervisor node to control the flow of the agents.
 
     This node supervises the agents and determines the next appropriate action based on the current state and
-    updates the state accordingly the user.
+    updates the state accordingly for the user.
 
     Returns:
-        Command: Command with status update and goto next agent.
+        Command: Command with status update and go to next agent.
     """
     analysis_done = bool(state.get('analysis'))
 

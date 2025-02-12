@@ -32,13 +32,13 @@ async def tool_get_google_news(query: str, date_from: str, max_items: int = 25) 
 
     run_input = {
         'query': query,
-        'dateFrom': '2024-12-31',
+        'dateFrom': date_from,
         'maxItems': max_items,
         'extractImages': False,
         'language': 'US:en',
     }
     if not (run := await Actor.apify_client.actor('lhotanova/google-news-scraper').call(run_input=run_input)):
-        msg = 'Failed to start the Actor canadesk/google-news-scraper!'
+        msg = 'Failed to start the Actor lhotanova/google-news-scraper!'
         raise RuntimeError(msg)
 
     dataset_id = run['defaultDatasetId']

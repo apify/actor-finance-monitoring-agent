@@ -66,4 +66,4 @@ class OutputTickerReport(BaseModel):
         ...,
         description=('Reason for the sentiment analysis. Short reasoning about the sentiment (1-2 sentences at most).'),
     )
-    report: str = Field(..., description='Finance monitoring report')
+    report: str = Field(..., description='Financial monitoring report')
