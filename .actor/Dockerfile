@@ -26,4 +26,4 @@ RUN useradd -m apify && \
 
 USER apify
 
-CMD ["uv", "run", "python3", "-m", "src"]
+CMD ["uv", "run", "--no-dev", "--frozen", "python3", "-m", "src"]

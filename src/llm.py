@@ -1,3 +1,5 @@
+"""This module contains the singleton class for ChatOpenAI instance."""
+
 from langchain_openai import ChatOpenAI
 
 

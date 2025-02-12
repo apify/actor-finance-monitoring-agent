@@ -6,7 +6,7 @@
     "ticker": {
       "title": "Ticker",
       "type": "string",
-      "description": "The ticker of the stock to analyze.",
+      "description": "The ticker of the stock to analyze (e.g. TSLA, AAPL, AMZN).",
       "editor": "textfield",
       "prefill": "TSLA"
     },

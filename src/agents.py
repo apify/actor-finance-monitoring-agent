@@ -1,3 +1,10 @@
+"""This module contains the agents/nodes for the finance monitoring agent graph.
+
+They are the building blocks of the graph and are used to perform specific tasks. For example
+in this case the supervisor node controls the flow of the agents and determines the next appropriate action.
+The other two agents are used to analyze the stock ticker and create a report based on the analysis for the user.
+"""
+
 import datetime
 import logging
 from typing import Literal
