@@ -51,13 +51,13 @@ async def agent_analysis(state: State, config: RunnableConfig) -> dict:
         (
             'user',
             (
-                'You are an AI agent specialized for finance data gathering and summarization. '
+                'You are an AI agent specialized in finance data gathering and summarization. '
                 'Your job is to use tools to gather relevant data about the stock ticker '
-                'and summarize it. Be sure to include important information and events, '
-                'analyst recommendations and price targets. '
+                'and summarize it. Be sure to include news and important information, '
+                'analyst recommendations, and price targets. '
                 'Gather information from as many sources as you have access to. '
-                'So if you have tools available for news from Yahoo, Google, and X.com, use all of them. '
-                'If you have source link available, include it in the summary. '
+                'For example if you have tools available for news from Yahoo, Google, and X.com, use all of them. '
+                'If you have a source URL link available, for example for news, you must include it in the summary. '
                 'If for some reason any tool fails, try to rerun it once more.'
                 '\n'
                 f'Ticker: {state["ticker"]}\n'
@@ -114,12 +114,13 @@ def agent_report(state: State) -> dict:
             (
                 'You are an AI agent for finance report generation. '
                 'Create a comprehensive report about the stock ticker using the provided data. '
-                'If you have source link available for news, include it in the report. '
+                'If you have a source URL link available, for example, for news, you must include it in the report. '
                 'DO NOT MAKE UP ANY DATA. IF YOU DO NOT KNOW SOMETHING, LEAVE IT OUT. '
                 'DO NOT TRY TO INTERACT WITH THE USER, ONLY CREATE A REPORT. '
-                'REPORT OUTLINE MUST BE AS FOLLOWS (MD format):\n'
-                '- Executive summary - brief overview of the company news from the analysis and its financial health.\n'
-                '- Important events - recent news and events that may have affected the stock price.\n'
+                'THE REPORT OUTLINE MUST BE AS FOLLOWS (MD format):\n'
+                "- Executive summary - a brief overview of the news from the analysis and the company's "
+                'financial health.\n'
+                '- News - recent news and events that may have affected the stock price.\n'
                 '- Stock price - current stock price and price targets.\n'
                 '- Analyst recommendations - current analyst recommendations for the stock.\n'
                 '- Conclusion - final thoughts on the stock and its future prospects.\n'
