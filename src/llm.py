@@ -4,7 +4,12 @@ from langchain_openai import ChatOpenAI
 
 
 class ChatOpenAISingleton:
-    """Singleton class for ChatOpenAI instance."""
+    """Singleton class for ChatOpenAI instance.
+
+    To use the singleton class, call the create_get_instance method to create the instance and get the instance.
+    After creating the instance, you can get the instance using the get_instance method. For example, you can create the
+    instance in the main function and get the instance in the agents.
+    """
 
     _instance: ChatOpenAI | None = None
 

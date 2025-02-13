@@ -1,6 +1,6 @@
-"""Graph state module.
+"""This module defines the graph state for the agent graph.
 
-This module contains the state definition for the agent graph.
+The state is for passing input/output data between graph nodes/agents.
 Resources:
     - https://langchain-ai.github.io/langgraph/concepts/low_level/#state
     - https://langchain-ai.github.io/langgraph/concepts/memory/

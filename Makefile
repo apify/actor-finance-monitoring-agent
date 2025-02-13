@@ -1,4 +1,3 @@
-
 DIRS_WITH_CODE = src/ tests/
 
 .PHONY: clean

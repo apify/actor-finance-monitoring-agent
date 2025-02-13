@@ -1,3 +1,8 @@
+"""This module defines Pydantic models for this project.
+
+These models are used mainly for the structured tool and LLM outputs.
+"""
+
 from pydantic import BaseModel, Field
 
 
@@ -38,20 +43,6 @@ class TickerRecommendationEntry(BaseModel):
     recommendations_hold: int = Field(..., description='Number of hold recommendations')
     recommendations_sell: int = Field(..., description='Number of sell recommendations')
     recommendations_strong_sell: int = Field(..., description='Number of strong sell recommendations')
-
-
-class SupervisorOutput(BaseModel):
-    """Structured output from the supervisor agent."""
-
-    next_agent: str = Field(..., description='Next agent to run')
-    status: str = Field(
-        ...,
-        description=(
-            'Current status of analysis, is one of the following:\n'
-            'gathering and analyzing data...\n'
-            'creating report...\n'
-        ),
-    )
 
 
 class OutputTickerReport(BaseModel):

@@ -4,9 +4,6 @@ WORKDIR /usr/src/app
 
 COPY pyproject.toml uv.lock ./
 
-ARG ACTOR_PATH_IN_DOCKER_CONTEXT
-ENV ACTOR_PATH_IN_DOCKER_CONTEXT="${ACTOR_PATH_IN_DOCKER_CONTEXT}"
-
 RUN echo "Python version:" \
     && python --version \
     && echo "Pip version:" \
