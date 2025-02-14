@@ -4,7 +4,7 @@ They are the building blocks of the graph and are used to perform specific tasks
 in this case, the supervisor node controls the flow of the agents and determines the next appropriate action.
 The other two agents are used to analyze the stock ticker and create a report based on the analysis for the user.
 
-Please see:
+Resources:
 - https://langchain-ai.github.io/langgraph/concepts/multi_agent/
 """
 

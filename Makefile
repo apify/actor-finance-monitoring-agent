@@ -1,8 +1,6 @@
-DIRS_WITH_CODE = src/ tests/
-
 .PHONY: clean
 clean:
-	rm -rf .mypy_cache .pytest_cache .ruff_cache build dist htmlcov .coverage
+	rm -rf .mypy_cache .pytest_cache .ruff_cache build dist
 
 .PHONY: install-dev
 install-dev:
@@ -10,17 +8,17 @@ install-dev:
 
 .PHONY: lint
 lint:
-	uv run ruff format --check $(DIRS_WITH_CODE)
-	uv run ruff check --preview $(DIRS_WITH_CODE)
+	uv run ruff format --check
+	uv run ruff check --preview
 
 .PHONY: type-check
 type-check:
-	uv run mypy $(DIRS_WITH_CODE)
+	uv run mypy
 
 .PHONY: format
 format:
-	uv run ruff check --fix $(DIRS_WITH_CODE)
-	uv run ruff format $(DIRS_WITH_CODE)
+	uv run ruff check --fix
+	uv run ruff format
 
 .PHONY: unit-test
 unit-test:

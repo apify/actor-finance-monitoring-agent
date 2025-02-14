@@ -2,7 +2,7 @@
 
 Feel free to modify or add new tools to suit your specific needs.
 
-To learn how to create a new tool, please see:
+To learn how to create a new tool, see:
 - https://python.langchain.com/docs/concepts/tools/
 - https://python.langchain.com/docs/how_to/#tools
 """
