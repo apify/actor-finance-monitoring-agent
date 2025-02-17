@@ -1,0 +1,42 @@
+{
+  "title": "Finance Monitoring Agent",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "ticker": {
+      "title": "Ticker",
+      "type": "string",
+      "description": "The ticker of the stock to analyze (e.g. TSLA, AAPL, AMZN).",
+      "editor": "textfield",
+      "prefill": "TSLA"
+    },
+    "model": {
+      "title": "OpenAI model",
+      "type": "string",
+      "description": "The OpenAI model to use. Currently supported models are gpt-4o and gpt-4o-mini and the reasoning models o1 and o3-mini. For best results, use gpt-4o.",
+      "enum": [
+        "gpt-4o",
+        "gpt-4o-mini",
+        "o1",
+        "o3-mini"
+      ],
+      "default": "gpt-4o",
+      "prefill": "gpt-4o-mini"
+    },
+    "openai_api_key": {
+      "title": "OpenAI API Key",
+      "type": "string",
+      "description": "The API key for the OpenAI API.",
+      "editor": "textfield",
+      "isSecret": true
+    },
+    "debug": {
+      "title": "Debug",
+      "type": "boolean",
+      "description": "If enabled, the Actor will run in debug mode and produce more output.",
+      "editor": "checkbox",
+      "default": false
+    }
+  },
+  "required": ["ticker", "model", "openai_api_key"]
+}

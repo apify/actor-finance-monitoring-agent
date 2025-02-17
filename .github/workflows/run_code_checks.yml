@@ -1,0 +1,38 @@
+name: Code checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  code_check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.13"]
+        uv-version: ["latest"]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install a specific version of uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        version: ${{ matrix.uv-version }}
+
+    - name: Install dependencies
+      run: uv sync --frozen --group dev
+
+    - name: Run lint
+      run: make lint
+
+    - name: Run type check
+      run: make type-check
+
+    - name: Run tests
+      run: make unit-test
