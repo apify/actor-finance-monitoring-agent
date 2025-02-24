@@ -119,9 +119,9 @@ uv sync
 To run the Actor locally, use the following command:
 
 ```bash
-apify run -p -i '{"ticker": "TSLA", "model": "gpt-4o", "openai_api_key": "your_openai_api_key_here"}'
+apify run -p -i '{"ticker": "TSLA", "model": "gpt-4o"}'
 # in debug mode
-#apify run -p -i '{"debug": true, "ticker": "TSLA", "model": "gpt-4o", "openai_api_key": "your_openai_api_key_here"}'
+#apify run -p -i '{"debug": true, "ticker": "TSLA", "model": "gpt-4o"}'
 ```
 
 The output report will be saved in the **storage/key_value_stores/default/** directory.
