@@ -93,14 +93,12 @@ async def tool_get_google_ticker_info(ticker: str) -> GoogleTickerInfo:
 
     # First search for the eschange the ticker uses
     actor_id = 'scraped_org/google-finance-scraper'
-    run_input = {
-      "action": "search_stocks",
-      "proxy": {
-        "useApifyProxy": True
-      },
-      "search_stocks": ticker,
+    search_run_input: dict = {
+        'action': 'search_stocks',
+        'proxy': {'useApifyProxy': True},
+        'search_stocks': ticker,
     }
-    dataset_id, dataset_items = await run_actor_get_default_dataset(actor_id, run_input)
+    dataset_id, dataset_items = await run_actor_get_default_dataset(actor_id, search_run_input)
     if not dataset_items:
         msg = f'Could not find ticker {ticker} in Google Finance'
         raise RuntimeError(msg)
@@ -115,7 +113,7 @@ async def tool_get_google_ticker_info(ticker: str) -> GoogleTickerInfo:
         msg = f'Could not find ticker {ticker} in Google Finance'
         raise RuntimeError(msg)
 
-    run_input = {
+    get_run_input: dict = {
         'action': 'stocks_details',
         'extract_quarterly_financial': True,
         'extract_stock_news': True,
@@ -129,7 +127,7 @@ async def tool_get_google_ticker_info(ticker: str) -> GoogleTickerInfo:
         'market_trends_types': ['most-active'],
     }
     actor_id = 'scraped_org/google-finance-scraper'
-    dataset_id, dataset_items = await run_actor_get_default_dataset(actor_id, run_input)
+    dataset_id, dataset_items = await run_actor_get_default_dataset(actor_id, get_run_input)
 
     if not dataset_items:
         msg = f'Failed to get data from dataset "{dataset_id}"! Dataset is empty.'
