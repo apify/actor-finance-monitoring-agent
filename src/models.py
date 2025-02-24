@@ -6,6 +6,30 @@ These models are used mainly for the structured tool and LLM outputs.
 from pydantic import BaseModel, Field
 
 
+class GoogleTickerInfoYearlyFinancials(BaseModel):
+    """Yearly financials for a ticker from Google Finance."""
+
+    year: int = Field(..., description='Year')
+    earning_per_share: float | None = Field(None, description='Earnings per share')
+    net_profit_margin: float | None = Field(None, description='Net profit margin percentage')
+    return_on_capital: float | None = Field(None, description='Return on capital percentage')
+    effective_tax_rate: float | None = Field(None, description='Effective tax rate percentage')
+    return_on_assets: float | None = Field(None, description='Return on assets percentage')
+    price_to_book: float | None = Field(None, description='Price to book ratio')
+
+
+class GoogleTickerInfo(BaseModel):
+    """Information about a ticker from Google Finance."""
+
+    current_price: float = Field(..., description='Current price')
+    about: str = Field(..., description='Ticker description')
+    ceo: str = Field(..., description='Ticker CEO')
+    founded: str = Field(..., description='Ticker founding date')
+    price_year_range: tuple[float, float] = Field(..., description='52-week price range')
+    pe_ratio: float = Field(..., description='PE ratio')
+    yerly_financials: list[GoogleTickerInfoYearlyFinancials] = Field(..., description='Yearly financials')
+
+
 class TickerPriceTarget(BaseModel):
     """Analyst price targets for a ticker."""
 

@@ -22,10 +22,7 @@ from src.models import OutputTickerReport
 from src.state import State
 from src.tools import (
     tool_get_google_news,
-    tool_get_ticker_basic_info,
-    tool_get_ticker_price_targets,
-    tool_get_ticker_recommendations,
-    tool_get_yahoo_ticker_news,
+    tool_get_google_ticker_info,
 )
 
 logger = logging.getLogger('apify')
@@ -42,10 +39,8 @@ async def agent_analysis(state: State, config: RunnableConfig) -> dict:
     """
     llm = ChatOpenAISingleton.get_instance()
     tools = [
-        tool_get_ticker_basic_info,
-        tool_get_yahoo_ticker_news,
-        tool_get_ticker_price_targets,
-        tool_get_ticker_recommendations,
+        # Yahoo tools are currently excluded - scraper is not working
+        tool_get_google_ticker_info,
         tool_get_google_news,
     ]
     subgraph = create_react_agent(llm, tools)
@@ -56,8 +51,8 @@ async def agent_analysis(state: State, config: RunnableConfig) -> dict:
             (
                 'You are an AI agent specialized in finance data gathering and summarization. '
                 'Your job is to use tools to gather relevant data about the stock ticker '
-                'and summarize it. Be sure to include news and important information, '
-                'analyst recommendations, and price targets. '
+                'and summarize it. Be sure to include news, important information, '
+                'and key financial data. '
                 'Gather information from as many sources as you have access to. '
                 'For example if you have tools available for news from Yahoo, Google, and X.com, use all of them. '
                 'If you have a source URL link available, for example for news, you must include it in the summary. '
@@ -123,10 +118,10 @@ def agent_report(state: State) -> dict:
                 'THE REPORT OUTLINE MUST BE AS FOLLOWS (MD format):\n'
                 "- Executive summary - a brief overview of the news from the analysis and the company's "
                 'financial health.\n'
-                '- News - recent news and events that may have affected the stock price.\n'
-                '- Stock price - current stock price and price targets.\n'
-                '- Analyst recommendations - current analyst recommendations for the stock.\n'
+                '- Financials - current financial data.\n'
+                '- Yearly financials highlights - highlights of the yearly financials from previous years.\n'
                 '- Conclusion - final thoughts on the stock and its future prospects.\n'
+                '- News - recent news and events that may have affected the stock price.\n'
                 f'Ticker: {state["ticker"]}\n'
                 f"Today's date: {datetime.datetime.now(tz=datetime.UTC).strftime('%Y-%m-%d')}"
             ),

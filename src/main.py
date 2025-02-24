@@ -1,11 +1,12 @@
 import logging
-import os
 from typing import TYPE_CHECKING
 
 from apify import Actor
+from langchain_community.callbacks import get_openai_callback
 
 from src.graph import build_compiled_graph
 from src.llm import ChatOpenAISingleton
+from src.ppe_utils import charge_for_actor_start, charge_for_model_tokens
 
 if TYPE_CHECKING:
     from langchain_core.runnables.config import RunnableConfig
@@ -25,18 +26,17 @@ async def main() -> None:
         # Handle input
         actor_input = await Actor.get_input()
         ticker = actor_input.get('ticker')
-        openai_api_key = actor_input.get('openai_api_key')
-        model = actor_input.get('model')
+        model = actor_input.get('model', 'gpt-4o-mini')  # Default model if not provided
         debug = actor_input.get('debug', False)
         if debug:
             logger.setLevel(logging.DEBUG)
         if not ticker:
             msg = 'Missing "ticker" attribute in input!'
             raise ValueError(msg)
-        if not openai_api_key:
-            msg = 'Missing "openai_api_key" attribute in input!'
-            raise ValueError(msg)
-        os.environ['OPENAI_API_KEY'] = openai_api_key
+
+        # Charge for actor start
+        await charge_for_actor_start()
+
         # Create ChatOpenAI singleton instance
         ChatOpenAISingleton.create_get_instance(model=model)
 
@@ -45,21 +45,23 @@ async def main() -> None:
         graph = build_compiled_graph()
         graph.update_state(config, {'ticker': ticker})
 
-        # Run the graph
+        # Run the graph and track token usage
         inputs: dict = {'messages': []}
         report: OutputTickerReport | None = None
         actor_status = None
-        async for state in graph.astream(inputs, config, stream_mode='values'):
-            logger.debug('-------- State --------')
-            logger.debug('State: %s', state)
-            status = state.get('status')
-            if status and status != actor_status:
-                await Actor.set_status_message(f'Agent: {status}')
-                logger.info('Agent: %s', status)
-                actor_status = status
+        total_tokens = 0
+        with get_openai_callback() as callback:
+            async for state in graph.astream(inputs, config, stream_mode='values'):
+                logger.debug('-------- State --------')
+                logger.debug('State: %s', state)
+                status = state.get('status')
+                if status and status != actor_status:
+                    await Actor.set_status_message(f'Agent: {status}')
+                    logger.info('Agent: %s', status)
+                    actor_status = status
 
-            if report := state.get('report'):
-                break
+                if report := state.get('report'):
+                    break
 
         if not report:
             msg = 'Failed to generate the report!'
@@ -67,6 +69,10 @@ async def main() -> None:
 
         logger.info('-------- Report --------')
         logger.info('Report: %s', report)
+
+        # Charge for total token usage
+        total_tokens = callback.total_tokens
+        await charge_for_model_tokens(model, total_tokens)
 
         # Add report disclaimer
         output_report = (

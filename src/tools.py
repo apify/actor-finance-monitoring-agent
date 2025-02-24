@@ -13,8 +13,15 @@ import logging
 from apify import Actor
 from langchain_core.tools import tool
 
-from src.models import TickerInfo, TickerNewsEntry, TickerPriceTarget, TickerRecommendationEntry
-from src.utils import get_yahoo_dataset_data
+from src.models import (
+    GoogleTickerInfo,
+    GoogleTickerInfoYearlyFinancials,
+    TickerInfo,
+    TickerNewsEntry,
+    TickerPriceTarget,
+    TickerRecommendationEntry,
+)
+from src.utils import get_yahoo_dataset_data, run_actor_get_default_dataset
 
 logger = logging.getLogger('apify')
 
@@ -30,9 +37,6 @@ async def tool_get_google_news(query: str, date_from: str, max_items: int = 25) 
 
     Returns:
         list[TickerNewsEntry]: Recent news.
-
-    Raises:
-        RuntimeError: If dataset does not contain required fields.
     """
     logger.debug('Running tool: tool_get_google_news')
 
@@ -46,12 +50,8 @@ async def tool_get_google_news(query: str, date_from: str, max_items: int = 25) 
         'extractImages': False,
         'language': 'US:en',
     }
-    if not (run := await Actor.apify_client.actor('lhotanova/google-news-scraper').call(run_input=run_input)):
-        msg = 'Failed to start the Actor lhotanova/google-news-scraper!'
-        raise RuntimeError(msg)
-
-    dataset_id = run['defaultDatasetId']
-    dataset_items: list[dict] = (await Actor.apify_client.dataset(dataset_id).list_items()).items
+    actor_id = 'lhotanova/google-news-scraper'
+    _, dataset_items = await run_actor_get_default_dataset(actor_id, run_input)
 
     google_news = []
     for entry in dataset_items:
@@ -74,6 +74,71 @@ async def tool_get_google_news(query: str, date_from: str, max_items: int = 25) 
     return google_news
 
 
+@tool
+async def tool_get_google_ticker_info(ticker: str) -> GoogleTickerInfo:
+    """Tool to get information about a ticker from Google Finance.
+
+    Information includes ticker description, CEO and key stocks financials data.
+
+    Args:
+        ticker (str): Ticker symbol, for example 'TSLA:NASDAQ'.
+
+    Returns:
+        GoogleTickerInfo: Ticker information.
+
+    Raises:
+        RuntimeError: If dataset does not contain required fields.
+    """
+    logger.debug('Running tool: tool_get_google_ticker_info')
+
+    run_input = {
+        'action': 'stocks_details',
+        'extract_quarterly_financial': True,
+        'extract_stock_news': True,
+        'extract_stock_prices_in_day': True,
+        'extract_stock_prices_last_30_days': True,
+        'extract_yearly_financial': True,
+        'proxy': {'useApifyProxy': True},
+        'stocks': [ticker],
+        'country': 'us',
+        'language': 'en',
+        'market_trends_types': ['most-active'],
+    }
+    actor_id = 'scraped_org/google-finance-scraper'
+    dataset_id, dataset_items = await run_actor_get_default_dataset(actor_id, run_input)
+
+    if not dataset_items:
+        msg = f'Failed to get data from dataset "{dataset_id}"! Dataset is empty.'
+        raise RuntimeError(msg)
+
+    data = dataset_items[0]
+
+    return GoogleTickerInfo(
+        current_price=data.get('stock_details', {}).get('current_price'),
+        about=data.get('stock_about', {}).get('about'),
+        ceo=data.get('stock_about', {}).get('CEO'),
+        founded=data.get('stock_about', {}).get('founded'),
+        pe_ratio=data.get('stock_details', {}).get('pe_ratio'),
+        price_year_range=(
+            data.get('stock_details', {}).get('year_range', {}).get('min'),
+            data.get('stock_details', {}).get('year_range', {}).get('max'),
+        ),
+        yerly_financials=[
+            GoogleTickerInfoYearlyFinancials(
+                year=financial.get('year'),
+                earning_per_share=financial.get('earning_per_share'),
+                net_profit_margin=financial.get('net_profit_margin'),
+                return_on_capital=financial.get('return_on_capital'),
+                effective_tax_rate=financial.get('effective_tax_rate'),
+                return_on_assets=financial.get('return_on_assets'),
+                price_to_book=financial.get('price_to_book'),
+            )
+            for financial in data.get('financials', {}).get('yearly_financial', [])
+        ],
+    )
+
+
+# Yahoo tools are currently broken - scraper is not working #
 @tool
 async def tool_get_yahoo_ticker_news(ticker: str) -> list[TickerNewsEntry]:
     """Tool to get recent news from Yahoo Finance about a ticker.

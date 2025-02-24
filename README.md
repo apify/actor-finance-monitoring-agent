@@ -13,9 +13,6 @@ This agent is designed to:
 - **Leverage AI**: Utilizes OpenAI's capabilities, allowing customization between more advanced (GPT-4o) or faster, cheaper (GPT-4o Mini) models for analysis.
 - **Provide downloadable output**: The **report.md** file can be downloaded from the **key-value store** in the storage section of the Actor run details.
 
-### Sample Output
-
-Sample report from the **Finance Monitoring Agent** for the `TSLA` ticker is available [here](docs/report.md).
 
 ---
 
@@ -30,7 +27,7 @@ Sample report from the **Finance Monitoring Agent** for the `TSLA` ticker is ava
 
 The **Finance Monitoring Agent** leverages multiple data sources to ensure comprehensive and accurate analysis:
 
-- **Yahoo Finance**: Provides essential ticker information, price targets, and recommendations from analysts, as well as the latest news related to the stock. Using [Yahoo Finance](https://apify.com/canadesk/yahoo-finance) Apify Actor.
+- **Google Finance**: Provides essential ticker information and financial data for the ticker analysis. Using [Google Finance](https://apify.com/scraped_org/google-finance-scraper) Apify Actor.
 - **Google News**: Searches for relevant news articles to include in the sentiment analysis and overall report. Using [Google News Scraper](https://apify.com/lhotanova/google-news-scraper) Apify Actor.
 
 ---
@@ -41,25 +38,40 @@ The **Finance Monitoring Agent** leverages multiple data sources to ensure compr
 2. **Processing**: The agent fetches real-time data, processes it using the selected AI model, and compiles a report.
 3. **Output**: Generates a markdown report with analysis, which is pushed to Apify's dataset for review.
 
-### Input Example
+### 💰 Pricing
 
-NOTE: The requirement to provide an OpenAI API key will be removed in the future by using Pay Per Event Actor billing (or Price Per Job). This change could also appeal to users who are hesitant to share their API keys.
+This Actor uses the [Pay Per Event](https://docs.apify.com/sdk/js/docs/next/guides/pay-per-event) (PPE) monetization model, which provides flexible pricing based on defined events. Currently the Actor charges for Actor startup and for total token usage (based on OpenAI API output token price).
+
+The Actor's pricing is based on the following events:
+
+| Event | Price (USD) |
+|-------|-------------|
+| Actor startup (each 1 GB of memory) | $0.005 |
+| gpt-4o (100 tokens) | $0.001 |
+| gpt-4o-mini (100 tokens) | $0.00006 |
+| o1 (100 tokens) | $0.006 |
+| o3-mini (100 tokens) | $0.00044 |
+
+### Input Example
 
 ```json
 {
   "ticker": "TSLA",
   "model": "gpt-4o",
-  "openai_api_key": "your_openai_api_key_here"
 }
 ```
 
 ### Output Example
+
+Sample report from the **Finance Monitoring Agent** for the `TSLA` ticker is available [here](docs/report.md).
+
+Actor dataset output with structured sentiment analysis looks like this:
 ```json
 {
   "ticker": "TSLA",
   "sentiment": "hold",
-  "sentiment_reason": "The sentiment is derived from a mixed outlook among analysts...",
-  "report": "# Tesla, Inc. Financial Report - February 11, 2025 ## Executive Summary Tesla, Inc., under the leadership of Elon Musk, continues to be a significant player in the electric vehicle and clean energy sectors..."
+  "sentiment_reason": "Despite strong market position, the recall and negative outlook...",
+  "report": "..."
 }
 ```
 
@@ -107,9 +119,9 @@ uv sync
 To run the Actor locally, use the following command:
 
 ```bash
-apify run -p -i '{"ticker": "TSLA", "model": "gpt-4o", "openai_api_key": "your_openai_api_key_here"}'
+apify run -p -i '{"ticker": "TSLA", "model": "gpt-4o"}'
 # in debug mode
-#apify run -p -i '{"debug": true, "ticker": "TSLA", "model": "gpt-4o", "openai_api_key": "your_openai_api_key_here"}'
+#apify run -p -i '{"debug": true, "ticker": "TSLA", "model": "gpt-4o"}'
 ```
 
 The output report will be saved in the **storage/key_value_stores/default/** directory.
