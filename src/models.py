@@ -25,8 +25,8 @@ class GoogleTickerInfo(BaseModel):
     about: str = Field(..., description='Ticker description')
     ceo: str = Field(..., description='Ticker CEO')
     founded: str = Field(..., description='Ticker founding date')
-    price_year_range: tuple[float, float] = Field(..., description='52-week price range')
-    pe_ratio: float = Field(..., description='PE ratio')
+    price_year_range: tuple[float, float] | None = Field(None, description='52-week price range')
+    pe_ratio: float | None = Field(None, description='PE ratio')
     yerly_financials: list[GoogleTickerInfoYearlyFinancials] = Field(..., description='Yearly financials')
 
 

@@ -81,7 +81,7 @@ async def tool_get_google_ticker_info(ticker: str) -> GoogleTickerInfo:
     Information includes ticker description, CEO and key stocks financials data.
 
     Args:
-        ticker (str): Ticker symbol, for example 'TSLA:NASDAQ'.
+        ticker (str): Ticker symbol, for example 'TSLA'.
 
     Returns:
         GoogleTickerInfo: Ticker information.
@@ -91,6 +91,30 @@ async def tool_get_google_ticker_info(ticker: str) -> GoogleTickerInfo:
     """
     logger.debug('Running tool: tool_get_google_ticker_info')
 
+    # First search for the eschange the ticker uses
+    actor_id = 'scraped_org/google-finance-scraper'
+    run_input = {
+      "action": "search_stocks",
+      "proxy": {
+        "useApifyProxy": True
+      },
+      "search_stocks": ticker,
+    }
+    dataset_id, dataset_items = await run_actor_get_default_dataset(actor_id, run_input)
+    if not dataset_items:
+        msg = f'Could not find ticker {ticker} in Google Finance'
+        raise RuntimeError(msg)
+
+    # Get the stock id
+    stock_id = None
+    for item in dataset_items:
+        if (_ticker := item.get('ticker')) == ticker and (_stock_id := item.get('stock_id')):
+            stock_id = _stock_id
+            break
+    if not stock_id:
+        msg = f'Could not find ticker {ticker} in Google Finance'
+        raise RuntimeError(msg)
+
     run_input = {
         'action': 'stocks_details',
         'extract_quarterly_financial': True,
@@ -99,7 +123,7 @@ async def tool_get_google_ticker_info(ticker: str) -> GoogleTickerInfo:
         'extract_stock_prices_last_30_days': True,
         'extract_yearly_financial': True,
         'proxy': {'useApifyProxy': True},
-        'stocks': [ticker],
+        'stocks': [stock_id],
         'country': 'us',
         'language': 'en',
         'market_trends_types': ['most-active'],
