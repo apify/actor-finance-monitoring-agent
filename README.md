@@ -106,6 +106,12 @@ Start leveraging AI for your financial analysis today and make informed investme
 
 ---
 
+🌐 Open source
+
+This Actor is open source, hosted on [GitHub](https://github.com/apify/actor-finance-monitoring-agent).
+
+---
+
 ## Development
 
 Clone the repository and install the dependencies:
