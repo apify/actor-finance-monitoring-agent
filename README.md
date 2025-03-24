@@ -99,6 +99,9 @@ Actor dataset output with structured sentiment analysis looks like this:
 
 - [Apify platform](https://apify.com)
 - [Apify SDK documentation](https://docs.apify.com/sdk/python)
+- [What are AI Agents?](https://blog.apify.com/what-are-ai-agents/)
+- [AI agent architecture](https://blog.apify.com/ai-agent-architecture)
+- [How to build an AI agent on Apify](https://blog.apify.com/how-to-build-an-ai-agent/)
 
 ---
 
